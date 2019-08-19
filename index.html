@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>whip-round</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<style>
+		body{font:16px "Microsoft YaHei",tahoma,Arial;color:#111;-webkit-font-smoothing:antialiased}.fl{float:left;display:inline}.fr{float:right;display:inline}.clearfix:after{content:"";height:0;display:block;overflow:hidden;visibility:hidden;clear:both}body,button,dd,dl,dt,h1,h2,h3,h4,h5,h6,html,img,input,legend,li,ol,p,td,th,ul{margin:0;padding:0}h1,h2,h3,h4,h5,h6{font-weight:400}ol,ul{list-style:none}img{border:0 none;vertical-align:middle}em,i,th{font-style:normal;font-weight:400}input{outline:0 none;vertical-align:top}input::-ms-clear{display:none;}table{border-collapse:collapse;border-spacing:0}
+		.container{padding:15px;}
+		.title{height:50px;line-height:50px;position:fixed;left:0px;right:0px;top:0px;background:#3c3c3c;padding:0 15px;color:#fff;}
+		.title h3{font-weight:bold;font-size:24px;}
+		.title .search input,.title .search button{box-sizing:border-box;height:30px;padding:0 5px;border:1px solid rgba(0,0,0,.85);vertical-align:middle;background:rgba(255,255,255,.8);}
+		.title .search input{width:80px;text-align:center;border-right:0 none;}
+		.content{margin-top:50px;}
+		.content table{width:100%;margin:0 auto;}
+		.content table th,.content table td{height:30px;text-align:center;border-top:2px solid rgba(0,0,0,.85);border-bottom:2px solid rgba(0,0,0,.85);}
+		.content table th{height:40px;font-weight:bold;font-size:24px;}
+	</style>
+</head>
+<body>
+	<div class="container" id="container">
+		<div class="title">
+			<h3 class="fl">份子钱明细</h3>
+			<div class="search fr">
+				<input type="text" placeholder="Name"><button>搜索</button>
+			</div>
+		</div>
+		<div class="content">
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Send</th>
+						<th>Receive</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script>
+		$(function(){
+			var $container=$('#container'),
+				$title=$container.find('.title'),
+				$content=$container.find('.content');
+
+			function bind(){
+				var $search=$title.find('.search'),
+					$input=$title.find('input'),
+					$button=$title.find('button');
+				$button.on('click',function(){
+					var keyword=$input.val().trim();
+					whipRound.search(keyword);
+				});
+			}
+			bind();
+
+			function WhipRound(){
+				var self=this;
+				this.el={
+					tbody:$content.find('tbody')
+				};
+				this.data=[
+					{name:'钮晓龙',send:1,receive:0},
+					{name:'耿强',send:.5,receive:0},
+					{name:'郝德贤',send:.5,receive:0},
+					{name:'张旭',send:.5,receive:0},
+					{name:'姚启旺',send:1,receive:0},
+					{name:'张培宏',send:.5,receive:0}
+				];
+				this.state={
+					search:!1
+				};
+				this.set=function(data){
+					var $tr=$('<tr></tr>').appendTo(self.el.tbody);
+					for(var p in data)
+						$('<td></td>').html(data[p]).appendTo($tr);
+					return this;
+				};
+				this.search=function(keyword){
+					keyword=keyword.trim();
+					if(keyword){
+						this.el.tbody.html('');
+						this.data.forEach(function(item){
+							if(item.name.search(keyword)!==-1)
+								self.set(item);
+						});
+						this.state.search=!0;
+					}else{
+						if(this.state.search){
+							this.el.tbody.html('');
+							this.init();
+							this.state.search=!1;
+						}
+					}
+					return this;
+				};
+				this.init=function(){
+					this.data.forEach(function(item){
+						self.set(item);
+					});
+					return this;
+				};
+				return this.init();
+			}
+			var whipRound=new WhipRound();
+		});
+	</script>
+</body>
+</html>

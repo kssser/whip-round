@@ -8,7 +8,7 @@
 	<style>
 		body{font:16px "Microsoft YaHei",tahoma,Arial;color:#111;-webkit-font-smoothing:antialiased}.fl{float:left;display:inline}.fr{float:right;display:inline}.clearfix:after{content:"";height:0;display:block;overflow:hidden;visibility:hidden;clear:both}body,button,dd,dl,dt,h1,h2,h3,h4,h5,h6,html,img,input,legend,li,ol,p,td,th,ul{margin:0;padding:0}h1,h2,h3,h4,h5,h6{font-weight:400}ol,ul{list-style:none}img{border:0 none;vertical-align:middle}em,i,th{font-style:normal;font-weight:400}input{outline:0 none;vertical-align:top}input::-ms-clear{display:none;}table{border-collapse:collapse;border-spacing:0}
 		.container{padding:15px;}
-		.title{height:50px;line-height:50px;position:fixed;left:0px;right:0px;top:0px;background:#3c3c3c;padding:0 15px;color:#fff;}
+		.title{height:50px;line-height:50px;position:fixed;z-index:1;left:0px;right:0px;top:0px;background:#3c3c3c;padding:0 15px;color:#fff;}
 		.title h3{font-weight:bold;font-size:24px;}
 		.title .search input,.title .search button{box-sizing:border-box;height:30px;padding:0 5px;border:1px solid rgba(0,0,0,.85);vertical-align:middle;background:rgba(255,255,255,.8);outline:0 none;}
 		.title .search input{width:80px;text-align:center;border-right:0 none;}
@@ -16,6 +16,7 @@
 		.content table{width:100%;margin:0 auto;}
 		.content table th,.content table td{height:30px;text-align:center;border-top:2px solid rgba(0,0,0,.85);border-bottom:2px solid rgba(0,0,0,.85);}
 		.content table th{height:40px;font-weight:bold;font-size:24px;}
+		.dialog{display:none;position:fixed;z-index:2;left:0;right:0;width:120px;top:40%;margin:0 auto;background:rgba(0,0,0,.75);color:#fff;padding:8px 15px;border-radius:4px;}
 	</style>
 </head>
 <body>
@@ -38,18 +39,38 @@
 				<tbody></tbody>
 			</table>
 		</div>
+		<div class="dialog"></div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script>
 		$(function(){
 			var $container=$('#container'),
 				$title=$container.find('.title'),
-				$content=$container.find('.content');
+				$content=$container.find('.content'),
+				$dialog=$container.find('.dialog');
 
 			function bind(){
-				var $search=$title.find('.search'),
+				var $h3=$title.find('h3'),
+					timer=0,
+					$search=$title.find('.search'),
 					$input=$title.find('input'),
 					$button=$title.find('button');
+				$h3.on('click',function(){
+					if(timer===0){
+						var total=whipRound.total();
+						for(var p in total)
+							$('<p></p>').html(p+' : '+total[p]*1000).appendTo($dialog);
+					}
+					$dialog.stop(true).fadeIn(500,function(){
+						clearTimeout(timer);
+						timer=setTimeout(function(){
+							$dialog.stop(true).fadeOut(500,function(){
+								$dialog.html('');
+								timer=0;
+							});
+						},3000);
+					});
+				});
 				$button.on('click',function(){
 					var keyword=$input.val().trim();
 					whipRound.search(keyword);
@@ -73,6 +94,17 @@
 				];
 				this.state={
 					search:!1
+				};
+				this.total=function(){
+					var res={
+						send:0,
+						receive:0
+					};
+					this.data.forEach(function(item){
+						for(var p in res)
+							res[p]+=item[p];
+					});
+					return res;
 				};
 				this.set=function(data){
 					var $tr=$('<tr></tr>').appendTo(self.el.tbody);

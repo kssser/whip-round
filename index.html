@@ -16,7 +16,25 @@
 		.content table{width:100%;margin:0 auto;}
 		.content table th,.content table td{height:30px;text-align:center;border-top:2px solid rgba(0,0,0,.85);border-bottom:2px solid rgba(0,0,0,.85);}
 		.content table th{height:40px;font-weight:bold;font-size:24px;}
-		.dialog{display:none;position:fixed;z-index:2;left:0;right:0;width:120px;top:40%;margin:0 auto;background:rgba(0,0,0,.75);color:#fff;padding:8px 15px;border-radius:4px;}
+		.total{position:fixed;right:20px;bottom:20px;width:40px;height:40px;line-height:40px;background:rgba(0,0,0,.8);border-radius:20px;color:#fff;overflow:hidden;}
+		.total .thumbnail{width:100%;height:100%;text-align:center;font-weight:bold;}
+		.total .detail{display:none;width:100%;height:100%;text-align:center;}
+		.animate{
+			animation:open 5s;
+            -moz-animation:open 5s;
+            -webkit-animation:open 5s;
+            -o-animation:open 5s;
+		}
+		.total.animate .thumbnail{display:none;}
+		.total.animate .detail{display:block;}
+		@keyframes open{
+			0% {width:40px;transform:rotate(0deg);color:#fff;}
+			10% {width:40px;transform:rotate(720deg);color:transparent;}
+			20% {width:240px;transform:rotate(720deg);color:#fff;}
+			80% {width:240px;transform:rotate(720deg);color:#fff;}
+			90% {width:40px;transform:rotate(720deg);color:transparent;}
+			100% {width:40px;transform:rotate(0deg);color:#fff;}
+		}
 	</style>
 </head>
 <body>
@@ -39,7 +57,12 @@
 				<tbody></tbody>
 			</table>
 		</div>
-		<div class="dialog"></div>
+		<div class="total">
+			<div class="thumbnail">T</div>
+			<div class="detail">
+				Send : <i class="send"></i> , Receive : <i class="receive"></i>
+			</div>
+		</div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script>
@@ -47,36 +70,38 @@
 			var $container=$('#container'),
 				$title=$container.find('.title'),
 				$content=$container.find('.content'),
-				$dialog=$container.find('.dialog');
+				$total=$container.find('.total');
 
 			function bind(){
-				var $h3=$title.find('h3'),
-					timer=0,
-					$search=$title.find('.search'),
+				var $search=$title.find('.search'),
 					$input=$title.find('input'),
 					$button=$title.find('button');
-				$h3.on('click',function(){
-					if(timer===0){
-						var total=whipRound.total();
-						for(var p in total)
-							$('<p></p>').html(p+' : '+total[p]*1000).appendTo($dialog);
-					}
-					$dialog.stop(true).fadeIn(500,function(){
-						clearTimeout(timer);
-						timer=setTimeout(function(){
-							$dialog.stop(true).fadeOut(500,function(){
-								$dialog.html('');
-								timer=0;
-							});
-						},3000);
-					});
-				});
 				$button.on('click',function(){
 					var keyword=$input.val().trim();
 					whipRound.search(keyword);
 				});
+
+				var timer=0,
+					$send=$total.find('.send'),
+					$receive=$total.find('.receive');
+				$total.on('click',function(){
+					if(timer===0){
+						$total.addClass('animate');
+						timer=setTimeout(function(){
+							$total.removeClass('animate');
+							timer=0;
+						},5000);
+					}
+				});
+				function setTotal(oTotal){
+					$send.html(oTotal.send);
+					$receive.html(oTotal.receive);
+				}
+				return {
+					setTotal:setTotal
+				}
 			}
-			bind();
+			var fn=bind();
 
 			function WhipRound(){
 				var self=this;
@@ -84,13 +109,13 @@
 					tbody:$content.find('tbody')
 				};
 				this.data=[
-					{name:'钮晓龙',send:1,receive:0},
-					{name:'杜猛',send:.5,receive:0},
-					{name:'耿强',send:.5,receive:0},
-					{name:'郝德贤',send:.5,receive:0},
-					{name:'张旭',send:.5,receive:0},
-					{name:'姚启旺',send:1,receive:0},
-					{name:'张培宏',send:.5,receive:0}
+					{name:'钮晓龙',send:1000,receive:0},
+					{name:'杜猛',send:500,receive:0},
+					{name:'耿强',send:500,receive:0},
+					{name:'郝德贤',send:500,receive:0},
+					{name:'张旭',send:500,receive:0},
+					{name:'姚启旺',send:1000,receive:0},
+					{name:'张培宏',send:500,receive:0}
 				];
 				this.state={
 					search:!1
@@ -138,7 +163,13 @@
 				};
 				return this.init();
 			}
-			var whipRound=new WhipRound();
+
+			function init(){
+				var fn=bind(),
+					whipRound=new WhipRound();
+				fn.setTotal(whipRound.total());
+			}
+			init();
 		});
 	</script>
 </body>
